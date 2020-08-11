@@ -2,7 +2,7 @@
   "name": "siyu-rest",
   "version": "1.0.0",
   "description": "",
-  "main": "app.mjs",
+  "main": "index.js",
   "scripts": {
     "start": "node app.js"
   },
