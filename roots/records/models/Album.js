@@ -7,15 +7,12 @@ import { db_records } from '../../../mongo.js';
 const Schema = mongoose.Schema;
 
 let album_schema = new Schema({
-  title: {
-    type: String,
-    unique: true
-  },
-  tracks: Array,
+  title: { type: String, unique: true, required: true },
+  tracks: { type: Array, required: true },
   description: { type: String, default: "" },
   author: { type: String, default: "Various artists" },
   date: { type: Date, default: Date.now },
-  icon: { type: String, default: "music-circle-outline"},
+  icon: { type: String, default: "music-circle-outline" },
   is_hidden: { type: Boolean, default: false },
 },
   {
