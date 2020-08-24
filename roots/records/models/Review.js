@@ -6,8 +6,8 @@ import { db_records } from '../../../mongo.js';
 const Schema = mongoose.Schema;
 
 let review_schema = new Schema({
-  album_id: ObjectId,
-  user_id: ObjectId,
+  album_id: { type: ObjectId, required: true },
+  user_id: { type: ObjectId, required: true },
   comment: { type: String, default: "" },
   rating: { type: Number, default: -1 },
 },

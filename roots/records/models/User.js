@@ -7,11 +7,8 @@ import { db_records } from '../../../mongo.js';
 const Schema = mongoose.Schema;
 
 let user_schema = new Schema({
-  name: {
-    type: String,
-    unique: true
-  },
-  password: String,
+  name: { type: String, unique: true, required: true },
+  password: { type: String, required: true },,
   permissions: { type: Array, default: [] },
 },
   {
