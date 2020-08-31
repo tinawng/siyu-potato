@@ -80,10 +80,14 @@ export default async function (app, opts) {
   });
   app.get("/album/:album_id", async (req, res) => {
     if (req.is_auth) {
-      if (await hasPermission(req.user_id, "see-hidden-album") || await isOwner(req.user_id, req.params.album_id))
-        res.code(200).send(await album_model.find({ _id: req.params.album_id }).exec());
-      else
-        res.code(200).send(await album_model.find({ _id: req.params.album_id, is_hidden: false }).exec());
+      if (await hasPermission(req.user_id, "see-hidden-album") || await isOwner(req.user_id, req.params.album_id)) {
+        const album = await album_model.find({ _id: req.params.album_id }).exec();
+        res.code(200).send(album[0]);
+      }
+      else {
+        const album = await album_model.find({ _id: req.params.album_id, is_hidden: false }).exec()
+        res.code(200).send(album[0]);
+      }
     }
     else
       res.code(401).send({ message: "No logged user 🔒" });
@@ -144,7 +148,6 @@ export default async function (app, opts) {
       res.code(401).send({ message: "No logged user 🔒" });
   });
 
-
   // REVIEW
   app.post("/review", (req, res) => {
     if (req.is_auth) {
@@ -186,6 +189,8 @@ export default async function (app, opts) {
         });
       });
     }
+    else
+      res.code(401).send({ message: "Missing permission 🔒" });
   });
   app.post("/login", (req, res) => {
     let user_found;
@@ -248,8 +253,21 @@ export default async function (app, opts) {
       }
     })
   });
+  app.post("/user/permissions/:user_id", async (req, res) => {
+    if (await hasPermission(req.user_id, "manage-users")) {
+      const update = req.body;
+      console.log(update)
+      await user_model.findOneAndUpdate({'_id': req.params.user_id}, update)
+
+      const updated_user = await user_model.findOne({'_id': req.params.user_id})
+      res.code(200).send(updated_user);
+    }
+    else
+      res.code(401).send({ message: "Missing permission 🔒" });
+  })
 
   async function hasPermission(user_id, permission) {
+    if (!user_id) return undefined
     let rep;
     await user_model.findById(user_id, 'permissions', (error, user) => {
       if (error || user == null) {
@@ -259,8 +277,7 @@ export default async function (app, opts) {
       }
     });
     return rep;
-  }
-
+  };
   async function isOwner(user_id, object_id) {
     let rep;
     rep = await album_model.findOne({ user_id: user_id, _id: object_id }).exec();
@@ -272,5 +289,5 @@ export default async function (app, opts) {
     }
 
     return rep
-  }
+  };
 }
