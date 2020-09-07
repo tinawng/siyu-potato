@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import fastify from 'fastify';
 import cors from 'fastify-cors'
 import jwt from 'jsonwebtoken';
+import log from './logger/index.js';
 
 dotenv.config();
 
@@ -15,6 +16,13 @@ app.listen(8082, '0.0.0.0', (err) => {
 })
 
 app.register(cors, { origin: '*' });
+
+if (process.env.LOG_REQUESTS) {
+  app.addHook('onSend', (req, reply, payload, done) => {
+    log(reply, payload)
+    done()
+  })
+}
 
 app.decorateRequest('is_auth', '')
 app.decorateRequest('user_id', '')

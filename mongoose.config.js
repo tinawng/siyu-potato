@@ -11,5 +11,6 @@ mongoose.set('useFindAndModify', false);    // deprecation warning
 
 const db_garden = mongoose.createConnection('mongodb://' + process.env.MONGODB_HOST + '/garden');
 const db_records = mongoose.createConnection('mongodb://' + process.env.MONGODB_HOST + '/records');
+const db_logs = mongoose.createConnection('mongodb://' + process.env.MONGODB_HOST + '/logs');
 
-export { db_garden, db_records };
+export { db_garden, db_records, db_logs };
