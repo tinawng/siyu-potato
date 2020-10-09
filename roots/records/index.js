@@ -36,7 +36,7 @@ export default async function (app, opts) {
       const tracks = await track_model.find({ album_id: req.params.album_id }).exec();
       // 🗑️ Deleting tracks
       tracks.forEach(async (track) => {
-        await opts.ky.delete("track/" + track._id);
+        await opts.ky.delete("records/track/" + track._id);
       })
       // 🗑️ Deleting album
       await album_model.deleteOne({ _id: req.params.album_id });
@@ -85,7 +85,7 @@ export default async function (app, opts) {
       res.code(401).send({ message: "No logged user 🔒" });
   });
 
-  // TRACK rw delete
+  // TRACK finish delete
   app.post("/track", async (req, res) => {
     if (await hasPermission(req.user_id, "track.manage")) {
       const track = new track_model(req.body);
@@ -96,31 +96,32 @@ export default async function (app, opts) {
       res.code(401).send({ message: "Missing permission 🔒" });
   });
   app.post("/track/upload", async (req, res) => {
-    if (await hasPermission(req.user_id, "create-album")) {
+    if (await hasPermission(req.user_id, "album.manage")) {
       try {
-        // ⬇️ Retrieving file data from request
-        const data = await req.file()
+        // 🗃️ Retrieving file data from request
+        const data = await req.file();
         // ✏️ Writing the file in .temp/ with unique name
         const file_name = uuid();
         await pump(data.file, fs.createWriteStream("roots/records/.temp/" + file_name));
 
-        // ⬆️ Uploading file to Firebase Storage and clean up
-        await got.post('http://127.0.0.1:' + process.env.SERVER_PORT + "/firebase/storage/uploadlocal", {
+        // 🚀 Uploading file to Firebase Storage and clean up
+        await opts.ky.post("firebase/storage/uploadlocal", {
           json: {
-            secret: process.env.SECRET,
             path: "roots/records/.temp/" + file_name,
             cleanup: true,
-          },
-          responseType: 'json'
+          }
         });
 
+        console.log("up!")
+
         // 🌐 Setting file access to public and get its url
-        var { body } = await got.post('http://127.0.0.1:' + process.env.SERVER_PORT + "/firebase/storage/makepublic", {
+        var { body } = await opts.ky.post("firebase/storage/makepublic", {
           json: {
-            secret: process.env.SECRET,
             path: file_name,
           }
         });
+
+        console.log("del!")
 
         res.code(201).send({ path: body })
       } catch (error) {
@@ -151,6 +152,12 @@ export default async function (app, opts) {
     else
       res.code(401).send({ message: "Missing permission 🔒" });
   })
+  app.get("/tracks", async (req, res) => {
+    if (await hasPermission(req.user_id, "track.manage"))
+      res.code(200).send(await track_model.find());
+    else
+      res.code(401).send({ message: "No logged user 🔒" });
+  });
   app.get("/tracks/:album_id", async (req, res) => {
     if (req.is_auth)
       res.code(200).send(await track_model.find({ album_id: req.params.album_id }).exec());
@@ -164,7 +171,7 @@ export default async function (app, opts) {
       const found_review = await review_model.findOne({ track_id: req.body.track_id, user_id: req.user_id })
 
       if (found_review) {
-        const review =  await (await opts.ky.put("review/" + found_review._id, { json: req.body })).json()
+        const review =  await (await opts.ky.put("records/review/" + found_review._id, { json: req.body })).json()
         res.code(200).send(review);
       }
       else {
