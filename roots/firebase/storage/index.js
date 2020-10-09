@@ -35,10 +35,25 @@ export default async function (app, opts) {
 
     app.post("/makepublic", async (req, res) => {
         if (req.headers.secret === process.env.SECRET) {
+            
             const file = bucket.file(req.body.path)
             file.makePublic(function (err, api_res) {
                 res.code(200).send("https://www.googleapis.com/download/storage/v1/b/" + serviceAccount.project_id + ".appspot.com/o/" + api_res.object + "?generation=" + api_res.generation + "&alt=media");
             });
+
+            console.log(req.body.path)
+            // const file = await bucket.file(req.body.path)
+            console.log("before")
+            // var api_res = await file.makePublic();
+            const api_res = await bucket.file(req.body.path).makePublic();
+
+            // function (err, api_res) {
+            //     console.log("in")
+            //     res.code(200).send("https://www.googleapis.com/download/storage/v1/b/" + serviceAccount.project_id + ".appspot.com/o/" + api_res.object + "?generation=" + api_res.generation + "&alt=media");
+            // }
+            console.log(api_res)
+            console.log("out")
+            res.code(200).send("https://www.googleapis.com/download/storage/v1/b/" + serviceAccount.project_id + ".appspot.com/o/" + api_res.object + "?generation=" + api_res.generation + "&alt=media")
         }
         else
             res.code(401).send();
