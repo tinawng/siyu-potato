@@ -43,12 +43,12 @@ app.addHook('preHandler', (req, reply, done) => {
 
   // 💫 If request comes from server itself, bypass token checking
   if (req.headers.secret === process.env.SECRET) {
+    // 🔓 Log as OP
     req.is_auth = true;
-    req.user_id = process.env.SECRET;
-    done();
+    // 👥 Log as someone else ?
+    req.user_id = req.body ? req.body.as_user ? req.body.as_user : process.env.SECRET : process.env.SECRET;
   }
-
-  if (req.headers.authorization)
+  else if (req.headers.authorization)
     try {
       const token = req.headers.authorization.split(" ")[1];
       var decoded = jwt.verify(token, process.env.SECRET);
@@ -85,4 +85,6 @@ import root_firebase_storage from './roots/firebase/storage/index.js';
 app.register(root_firebase_storage, { prefix: "/firebase/storage" });
 import root_records from './roots/records/index.js';
 app.register(root_records, { prefix: "/records", ky: ky, ky_local: ky_local });
+import root_records_faker from './roots/records/faker.js';
+app.register(root_records_faker, { prefix: "/records/faker", ky: ky, ky_local: ky_local });
 
