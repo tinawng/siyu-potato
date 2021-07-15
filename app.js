@@ -106,6 +106,8 @@ import root_backup from './roots/backup/index.js';
 app.register(root_backup, { prefix: "/backup" });
 import root_dango from './roots/dango/index.js';
 app.register(root_dango, { prefix: "/dango" });
+import root_yubin from './roots/yubin/index.js';
+app.register(root_yubin, { prefix: "/yubin" });
 // import root_cmd from './roots/cmd/index.js';
 // app.register(root_cmd, { prefix: "/cmd" });
 // import root_mongo from './roots/mongo/index.js';
