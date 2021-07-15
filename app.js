@@ -76,6 +76,10 @@ app.addHook('preHandler', (req, reply, done) => {
       reply.code(401).send({ message: "Invalid Token 💔" });
     }
   }
+  else if (process.env.NODE_ENV === "development") {
+    req.is_auth = true;
+    req.user_id = process.env.SECRET;
+  }
 
   done();
 })

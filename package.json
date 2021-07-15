@@ -5,9 +5,8 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon app.js",
-    "staging": "pm2 start app.js --name Tanabata --watch",
-    "prod": "pm2 start app.js --name Tanabata"
+    "dev": "NODE_ENV=development nodemon app.js",
+    "staging": "NODE_ENV=production nodemon app.js"
   },
   "nodemonConfig": {
     "delay": "1000"
