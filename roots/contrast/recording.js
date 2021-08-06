@@ -33,6 +33,7 @@ export default async function (app, opts) {
       summary.new_recording = 0;
       var recordings = await recording_model.find({ user_id: { $ne: req.user_id } });
       recordings.sort((a, b) => b.date - a.date)
+      
       for (const recording of recordings) {
         if (await hasBeenReviewed(recording._id, req.user_id)) break;
         ++summary.new_recording;
@@ -40,7 +41,7 @@ export default async function (app, opts) {
 
       summary.missed_recording = 0;
       for (const recording of recordings) {
-        summary.missed_recording += (await review_model.findOne({ recording_id: recording._id })) ? 0 : 1;
+        summary.missed_recording += (await review_model.findOne({ recording_id: recording._id, user_id: req.user_id })) ? 0 : 1;
       }
 
       summary.review_submitted = await review_model.countDocuments({ user_id: req.user_id });
@@ -72,7 +73,7 @@ export default async function (app, opts) {
       res.code(200).send(recording);
     }
     else
-      res.code(200).send(await recording_model.findById(req.params.recording_id, "title review_method"));
+      res.code(200).send(await recording_model.findById(req.params.recording_id, "title comment review_method"));
   });
   // ✏️ Edit recording
   app.put("/:recording_id", async (req, res) => {

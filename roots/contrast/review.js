@@ -31,7 +31,7 @@ export default async function (app, opts) {
   // ✏️ Edit review
   app.put("/:review_id", async (req, res) => {
     if (await hasPermission(req.user_id, "review.modify") || await isOwner(req.user_id, req.params.review_id))
-      res.code(200).send(await review_model.findOneAndUpdate({ _id: req.params.review_id }, { content: req.body.content, recording_id: Date.now() }));
+      res.code(200).send(await review_model.findOneAndUpdate({ _id: req.params.review_id }, { content: req.body.content, date: Date.now() }));
     else
       res.code(401).send({ message: "Missing permission 🔒" });
   });
